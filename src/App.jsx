@@ -1,4 +1,5 @@
 // Import Dependencies
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "react-router";
 
 // Local Imports
@@ -12,18 +13,21 @@ import router from "app/router/router";
 // ----------------------------------------------------------------------
 
 function App() {
+  const queryClient = new QueryClient();
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <LocaleProvider>
-          <BreakpointProvider>
-            <SidebarProvider>
-              <RouterProvider router={router} />
-            </SidebarProvider>
-          </BreakpointProvider>
-        </LocaleProvider>
-      </ThemeProvider>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <ThemeProvider>
+          <LocaleProvider>
+            <BreakpointProvider>
+              <SidebarProvider>
+                <RouterProvider router={router} />
+              </SidebarProvider>
+            </BreakpointProvider>
+          </LocaleProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 

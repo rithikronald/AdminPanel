@@ -1,11 +1,22 @@
+import { useQuery } from "@tanstack/react-query";
+import { adminInstance } from "api";
 import { CreateReelsModal } from "components/custom/CreateReelsModal";
 import { HRTable } from "components/custom/HRTable";
 import { Page } from "components/shared/Page";
 import { Button } from "components/ui";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Reels() {
   const [openModal, setOpenModal] = useState(false);
+  const { data } = useQuery({
+    queryKey: ["reels"],
+    queryFn: () => adminInstance.get("reels/"),
+  });
+
+  useEffect(() => {
+    console.log("Data", data?.data?.data);
+  }, [data?.data]);
+
   return (
     <Page title="Reelspage">
       <div className="transition-content mb-4 w-full px-[--margin-x] pt-5 lg:pt-6">
