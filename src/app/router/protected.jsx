@@ -60,6 +60,13 @@ const protectedRoutes = {
                 Component: (await import("app/pages/reels/likes")).default,
               }),
             },
+            {
+              path: "createReels",
+              lazy: async () => ({
+                Component: (await import("app/pages/reels/createReels"))
+                  .default,
+              }),
+            },
           ],
         },
       ],

@@ -8,7 +8,8 @@
     "reels": {
       "reels": "Reels",
       "comments": "Comments",
-      "likes": "Likes"
+      "likes": "Likes",
+      "createReels": "Create Reels"
     },
     "settings": {
       "settings": "Settings",

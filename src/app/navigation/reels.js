@@ -37,5 +37,13 @@ export const reels = {
       transKey: "nav.reels.likes",
       Icon: VideoCameraIcon,
     },
+    {
+      id: "reels.createReels",
+      path: path(ROOT_DASHBOARDS, "/createReels"),
+      type: NAV_TYPE_ITEM,
+      title: "Create Reels",
+      transKey: "nav.reels.createReels",
+      Icon: VideoCameraIcon,
+    },
   ],
 };
