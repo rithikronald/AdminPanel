@@ -5,6 +5,11 @@
       "home": "Home",
       "reels": "Reels"
     },
+    "reels": {
+      "reels": "Reels",
+      "comments": "Comments",
+      "likes": "Likes"
+    },
     "settings": {
       "settings": "Settings",
       "general": "General",

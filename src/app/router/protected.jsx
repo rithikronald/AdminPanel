@@ -33,10 +33,31 @@ const protectedRoutes = {
                 Component: (await import("app/pages/dashboards/home")).default,
               }),
             },
+          ],
+        },
+        {
+          path: "reels",
+          children: [
+            {
+              index: true,
+              element: <Navigate to="/reels/reels" />,
+            },
             {
               path: "reels",
               lazy: async () => ({
-                Component: (await import("app/pages/dashboards/reels")).default,
+                Component: (await import("app/pages/reels/reels")).default,
+              }),
+            },
+            {
+              path: "comments",
+              lazy: async () => ({
+                Component: (await import("app/pages/reels/comments")).default,
+              }),
+            },
+            {
+              path: "likes",
+              lazy: async () => ({
+                Component: (await import("app/pages/reels/likes")).default,
               }),
             },
           ],
