@@ -2,8 +2,10 @@ import { CreateReelsModal } from "components/custom/CreateReelsModal";
 import { HRTable } from "components/custom/HRTable";
 import { Page } from "components/shared/Page";
 import { Button } from "components/ui";
+import { useState } from "react";
 
 export default function Reels() {
+  const [openModal, setOpenModal] = useState(false);
   return (
     <Page title="Reelspage">
       <div className="transition-content mb-4 w-full px-[--margin-x] pt-5 lg:pt-6">
@@ -13,14 +15,17 @@ export default function Reels() {
               Reels Section
             </h2>
             <Button
+              onClick={() => setOpenModal(true)}
               unstyled
               className="rounded-lg bg-gradient-to-r from-sky-400 to-blue-600 px-5 py-2 text-white duration-100 ease-out [contain:paint] hover:opacity-[.85] focus:opacity-[.85] active:translate-y-px"
             >
-              {/* <PlusIcon className="size-4 mr-1" /> */}
               Add Reels
             </Button>
           </div>
-          <CreateReelsModal />
+          <CreateReelsModal
+            isOpen={openModal}
+            onClose={() => setOpenModal(false)}
+          />
           <div className="mt-4 grid grid-cols-1 gap-4 sm:gap-5 lg:gap-6">
             <HRTable />
           </div>
