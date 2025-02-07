@@ -12,8 +12,10 @@ import { useDropzone } from "react-dropzone";
 import { useForm } from "react-hook-form";
 
 // Local Imports
+import { useMutation } from "@tanstack/react-query";
+import { adminInstance } from "api";
 import { FileItem } from "components/shared/form/FileItem";
-import { Button, Input, Textarea, Upload } from "components/ui";
+import { Button, Input, Radio, Textarea, Upload } from "components/ui";
 import { useListState } from "hooks";
 
 export function CreateReelsModal({ isOpen, onClose }) {
@@ -26,6 +28,31 @@ export function CreateReelsModal({ isOpen, onClose }) {
     trigger,
     formState: { errors },
   } = useForm();
+
+  const mutation = useMutation({
+    mutationFn: async (data) => {
+      const formData = new FormData();
+
+      formData.append("title", data.title);
+      formData.append("description", data.description);
+      formData.append("status", data.status);
+
+      if (data.video && data.video.length > 0) {
+        const videoFile = data.video[0]; // Assuming single file
+        formData.append("video", videoFile);
+      }
+      console.log("Form Data", formData);
+      return adminInstance.post("reels/", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    },
+    onSuccess: (val) => {
+      console.log("response", val);
+      onClose();
+    },
+  });
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => {
@@ -59,9 +86,27 @@ export function CreateReelsModal({ isOpen, onClose }) {
         return true;
       },
     },
+    status: {
+      required: "Please select a status",
+      validate: (value) => {
+        if (!["Active", "InActive"].includes(value)) {
+          return "Invalid status selection";
+        }
+        return true;
+      },
+    },
   };
 
-  const onSubmit = (data) => console.log(data);
+  const onSubmit = (data) => {
+    console.log(mutation.isPending);
+    console.log("DAta", JSON.stringify(data));
+    mutation.mutate({
+      title: data.title,
+      description: data.description,
+      video: data.video,
+      status: data.status,
+    });
+  };
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -156,6 +201,30 @@ export function CreateReelsModal({ isOpen, onClose }) {
                       ))}
                     </div>
                   </div>
+                  <div className="flex flex-wrap gap-5">
+                    <p className="text-black">Status:</p>
+                    <Radio
+                      label="Active"
+                      name="basic"
+                      {...register("status", {
+                        required: "Please select a status",
+                      })}
+                      value="active"
+                    />
+                    <Radio
+                      label="InActive"
+                      name="basic"
+                      {...register("status", {
+                        required: "Please select a status",
+                      })}
+                      value="inactive"
+                    />
+                  </div>
+                  {errors.status && (
+                    <p className="mt-2 text-sm text-red-500">
+                      {errors.status.message}
+                    </p>
+                  )}
                   <Button className="mt-4" color="primary" type="submit">
                     Submit
                   </Button>

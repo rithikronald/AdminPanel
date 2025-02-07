@@ -14,7 +14,7 @@ export default function Reels() {
   });
 
   useEffect(() => {
-    console.log("Data", data?.data?.data);
+    console.log("Data", JSON.stringify(data?.data?.data));
   }, [data?.data]);
 
   return (
