@@ -7,27 +7,33 @@ import {
 } from "@headlessui/react";
 import { CloudArrowUpIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useForm } from "react-hook-form";
 
 // Local Imports
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { adminInstance } from "api";
+import { editVideo } from "api/Reels";
 import { FileItem } from "components/shared/form/FileItem";
-import {
-  Button,
-  GhostSpinner,
-  Input,
-  Radio,
-  Textarea,
-  Upload,
-} from "components/ui";
+import { Button, Input, Radio, Textarea, Upload } from "components/ui";
 import { useListState } from "hooks";
 
-export function CreateReelsModal({ isOpen, onClose }) {
+export function EditReelsModal({ isOpen, onClose, reelsData }) {
   const [files, { remove, append }] = useListState();
+  const [changeVideo, setChangeVideo] = useState(false);
   const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: editVideo,
+    onSuccess: () => {
+      // Invalidate and refetch the videos list after successful deletion
+      queryClient.invalidateQueries(["reels"]);
+      onClose();
+    },
+    onError: (error) => {
+      console.error("Error deleting video:", error);
+    },
+  });
 
   const {
     register,
@@ -35,33 +41,8 @@ export function CreateReelsModal({ isOpen, onClose }) {
     setValue,
     trigger,
     formState: { errors },
+    reset,
   } = useForm();
-
-  const mutation = useMutation({
-    mutationFn: async (data) => {
-      const formData = new FormData();
-
-      formData.append("title", data.title);
-      formData.append("description", data.description);
-      formData.append("status", data.status);
-
-      if (data.video && data.video.length > 0) {
-        const videoFile = data.video[0]; // Assuming single file
-        formData.append("video", videoFile);
-      }
-      console.log("Form Data", formData);
-      return adminInstance.post("reels/", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-    },
-    onSuccess: (val) => {
-      console.log("response", val);
-      queryClient.invalidateQueries({ queryKey: ["reels"] });
-      onClose();
-    },
-  });
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => {
@@ -107,15 +88,44 @@ export function CreateReelsModal({ isOpen, onClose }) {
   };
 
   const onSubmit = (data) => {
-    console.log(mutation.isPending);
     console.log("DAta", JSON.stringify(data));
+    // console.log(mutation.isPending);
+    let body;
+    if (changeVideo) {
+      body = {
+        title: data.title,
+        description: data.description,
+        video: data.video,
+        status: data.status,
+      };
+    } else {
+      body = {
+        title: data.title,
+        description: data.description,
+        status: data.status,
+      };
+    }
+    console.log("BODY", body);
     mutation.mutate({
-      title: data.title,
-      description: data.description,
-      video: data.video,
-      status: data.status,
+      id: reelsData.id,
+      updatedData: body,
     });
   };
+
+  // useEffect(() => {
+  //   console.log("LOG", reelsData);
+  // }, []);
+
+  useEffect(() => {
+    if (reelsData) {
+      reset((prevValues) => ({
+        title: prevValues?.title ?? reelsData.title,
+        description: prevValues?.description ?? reelsData.description,
+        status: prevValues?.status ?? reelsData.status,
+        video: prevValues?.video ?? reelsData.video,
+      }));
+    }
+  }, [isOpen, reset]);
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -146,7 +156,7 @@ export function CreateReelsModal({ isOpen, onClose }) {
         >
           <DialogPanel className="scrollbar-sm relative flex w-[40%] max-w-md flex-col overflow-y-auto rounded-lg bg-white px-4 py-10 text-center transition-opacity duration-300 dark:bg-dark-700 sm:px-5">
             <div className="flex flex-1 flex-col">
-              <p className="text-2xl font-semibold">Create New Reels</p>
+              <p className="text-2xl font-semibold">Edit Reels</p>
               <div className="max-w-xl">
                 <form onSubmit={handleSubmit(onSubmit)}>
                   <Input
@@ -162,54 +172,74 @@ export function CreateReelsModal({ isOpen, onClose }) {
                     {...register("description", formOption.description)}
                     error={errors?.description && errors.description.message}
                   />
-                  <div>
-                    <Upload
-                      inputProps={{ ...getInputProps() }}
-                      {...getRootProps()}
-                    >
-                      {({ ...props }) => (
-                        <Button
-                          {...props}
-                          unstyled
-                          className={clsx(
-                            "mt-3 w-full shrink-0 flex-col rounded-lg border-2 border-dashed py-10",
-                            isDragActive
-                              ? "border-primary-600 dark:border-primary-500"
-                              : "border-gray-300 dark:border-dark-450",
-                          )}
-                        >
-                          <CloudArrowUpIcon className="size-12" />
-                          <span
+                  {changeVideo ? (
+                    <div>
+                      <Upload
+                        inputProps={{ ...getInputProps() }}
+                        {...getRootProps()}
+                      >
+                        {({ ...props }) => (
+                          <Button
+                            {...props}
+                            unstyled
                             className={clsx(
-                              "pointer-events-none mt-2",
+                              "mt-3 w-full shrink-0 flex-col rounded-lg border-2 border-dashed py-10",
                               isDragActive
-                                ? "text-primary-600 dark:text-primary-400"
-                                : "text-gray-600 dark:text-dark-200",
+                                ? "border-primary-600 dark:border-primary-500"
+                                : "border-gray-300 dark:border-dark-450",
                             )}
                           >
-                            <span className="text-primary-600 dark:text-primary-400">
-                              Browse
+                            <CloudArrowUpIcon className="size-12" />
+                            <span
+                              className={clsx(
+                                "pointer-events-none mt-2",
+                                isDragActive
+                                  ? "text-primary-600 dark:text-primary-400"
+                                  : "text-gray-600 dark:text-dark-200",
+                              )}
+                            >
+                              <span className="text-primary-600 dark:text-primary-400">
+                                Browse
+                              </span>
+                              <span> or drop your video files here</span>
                             </span>
-                            <span> or drop your video files here</span>
-                          </span>
-                        </Button>
+                          </Button>
+                        )}
+                      </Upload>
+                      {errors.video && (
+                        <p className="mt-2 text-sm text-red-500">
+                          {errors.video.message}
+                        </p>
                       )}
-                    </Upload>
-                    {errors.video && (
-                      <p className="mt-2 text-sm text-red-500">
-                        {errors.video.message}
-                      </p>
-                    )}
-                    <div className="mt-4 flex flex-col space-y-4">
-                      {files.map((file, index) => (
-                        <FileItem
-                          handleRemove={() => remove(index)}
-                          file={file}
-                          key={index}
-                        />
-                      ))}
+                      <div className="mt-4 flex flex-col space-y-4">
+                        {files.map((file, index) => (
+                          <FileItem
+                            handleRemove={() => remove(index)}
+                            file={file}
+                            key={index}
+                          />
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="m-4 flex items-center justify-around">
+                      <video width="100" height="100" controls>
+                        <source src={reelsData?.video} type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
+                      <div className="flex">
+                        <Button
+                          onClick={() => setChangeVideo(true)}
+                          className="mt-2"
+                          color="primary"
+                          variant="outlined"
+                        >
+                          Update Video
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex flex-wrap gap-5">
                     <p className="text-black">Status:</p>
                     <Radio
@@ -235,11 +265,7 @@ export function CreateReelsModal({ isOpen, onClose }) {
                     </p>
                   )}
                   <Button className="mt-4" color="primary" type="submit">
-                    {mutation.isPending && (
-                      <GhostSpinner className="size-4 border-2 mr-2" />
-                    )}
-
-                    <span>Submit</span>
+                    Submit
                   </Button>
                 </form>
               </div>

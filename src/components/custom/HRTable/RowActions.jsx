@@ -13,12 +13,14 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import { Fragment, useCallback, useState } from "react";
 import PropTypes from "prop-types";
+import { Fragment, useCallback, useState } from "react";
 
 // Local Imports
+import { useDeleteVideo } from "api/Reels";
 import { ConfirmModal } from "components/shared/ConfirmModal";
 import { Button } from "components/ui";
+import { EditReelsModal } from "../EditReelsModal";
 
 // ----------------------------------------------------------------------
 
@@ -37,6 +39,9 @@ export function RowActions({ row, table }) {
   const [confirmDeleteLoading, setConfirmDeleteLoading] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
+  const { mutate: deleteVideo, isLoading } = useDeleteVideo();
 
   const closeModal = () => {
     setDeleteModalOpen(false);
@@ -51,6 +56,7 @@ export function RowActions({ row, table }) {
   const handleDeleteRows = useCallback(() => {
     setConfirmDeleteLoading(true);
     setTimeout(() => {
+      deleteVideo(row.original.id);
       table.options.meta?.deleteRow(row);
       setDeleteSuccess(true);
       setConfirmDeleteLoading(false);
@@ -99,6 +105,9 @@ export function RowActions({ row, table }) {
               <MenuItem>
                 {({ focus }) => (
                   <button
+                    onClick={() => {
+                      setEditModalOpen(true);
+                    }}
                     className={clsx(
                       "flex h-9 w-full items-center space-x-3 px-3 tracking-wide outline-none transition-colors rtl:space-x-reverse",
                       focus &&
@@ -136,6 +145,11 @@ export function RowActions({ row, table }) {
         onOk={handleDeleteRows}
         confirmLoading={confirmDeleteLoading}
         state={state}
+      />
+      <EditReelsModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        reelsData={row.original}
       />
     </>
   );

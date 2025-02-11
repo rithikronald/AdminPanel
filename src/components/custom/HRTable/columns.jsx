@@ -22,11 +22,11 @@ import { HighlightableCell } from "components/shared/table/HighlightableCell";
 const columnHelper = createColumnHelper();
 
 export const columns = [
-  columnHelper.display({
-    id: "select",
-    header: SelectHeader,
-    cell: SelectCell,
-  }),
+  // columnHelper.display({
+  //   id: "select",
+  //   header: SelectHeader,
+  //   cell: SelectCell,
+  // }),
   columnHelper.accessor((row) => row.id, {
     id: "id",
     header: () => <span className="-mx-2">ID</span>,

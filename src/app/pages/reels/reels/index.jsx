@@ -8,13 +8,13 @@ import { useEffect, useState } from "react";
 
 export default function Reels() {
   const [openModal, setOpenModal] = useState(false);
-  const { data } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: ["reels"],
     queryFn: () => adminInstance.get("reels/"),
   });
 
   useEffect(() => {
-    console.log("Data", JSON.stringify(data?.data?.data));
+    console.log("Data", data?.data?.data);
   }, [data?.data]);
 
   return (
@@ -38,7 +38,11 @@ export default function Reels() {
             onClose={() => setOpenModal(false)}
           />
           <div className="mt-4 grid grid-cols-1 gap-4 sm:gap-5 lg:gap-6">
-            <HRTable />
+            {isLoading ? (
+              <p>Loading...</p>
+            ) : (
+              <HRTable key={isFetching} data={data?.data?.data} />
+            )}
           </div>
         </div>
       </div>

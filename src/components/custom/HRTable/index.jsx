@@ -15,9 +15,9 @@ import { Card, Table, TBody, Td, Th, THead, Tr } from "components/ui";
 import { useRef, useState } from "react";
 import { fuzzyFilter } from "utils/react-table/fuzzyFilter";
 import { columns } from "./columns";
-import { data } from "./fakeData";
+// import { data } from "./fakeData";
 
-export function HRTable() {
+export function HRTable({ data }) {
   const theadRef = useRef();
   const cardRef = useRef();
 
